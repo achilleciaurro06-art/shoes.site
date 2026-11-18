@@ -132,7 +132,10 @@ section{position:relative}
 /* ==========================================================================
    HERO
    ========================================================================== */
-.hero{position:relative;height:100vh;height:100svh;min-height:640px;background:var(--black);overflow:hidden;isolation:isolate}
+.hero{position:relative;height:380vh;background:var(--black)}
+.hero__pin{position:sticky;top:0;height:100vh;height:100svh;min-height:640px;overflow:hidden;isolation:isolate;background:var(--black)}
+.hero.no-video,.hero.is-static{height:100vh;height:100svh;min-height:640px}
+.hero.no-video .hero__pin,.hero.is-static .hero__pin{position:relative}
 .hero__media{position:absolute;left:0;right:0;top:0;bottom:12vh;-webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent);transform-origin:60% 40%;will-change:transform}
 .hero__poster,.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
 .hero__poster{opacity:0;transition:opacity 1s ease}
@@ -178,7 +181,7 @@ section{position:relative}
 .hero__replay{position:absolute;z-index:4;right:var(--gutter);top:50%;transform:translateY(-50%);color:var(--leather);display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .8s ease}
 .hero__replay.is-on{opacity:.9;pointer-events:auto}
 .hero__replay:hover{color:var(--ivory)}
-.hero__cue{position:absolute;z-index:3;left:50%;bottom:clamp(18px,3vh,30px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:rgba(242,239,233,.55);opacity:0;transition:opacity 1s ease 2.2s}
+.hero__cue{transition:opacity .6s ease!important;position:absolute;z-index:3;left:50%;bottom:clamp(18px,3vh,30px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:rgba(242,239,233,.55);opacity:0;transition:opacity 1s ease 2.2s}
 .is-ready .hero__cue{opacity:1}
 .hero__cue i{display:block;width:1px;height:34px;background:linear-gradient(var(--leather),transparent);animation:cue 2.4s var(--ease) infinite;transform-origin:top}
 @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
@@ -483,7 +486,8 @@ section{position:relative}
   .menu__aside{display:block;position:absolute;right:var(--gutter);top:calc(var(--nav-h) + 6px);width:min(26vw,104px);aspect-ratio:3/4;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity .9s ease .6s,transform 1.1s var(--ease-out) .6s}
   .menu__aside img{width:100%;height:100%;object-fit:cover}
   .menu.is-open .menu__aside{opacity:1;transform:none}
-  .hero{min-height:600px}
+  .hero{height:320vh}
+  .hero__pin{min-height:600px}
   .hero__media{top:calc(var(--nav-h) + 9svh);bottom:auto;height:min(60vh,74vw);left:50%;right:auto;width:132vw;transform:translateX(-50%);-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 78%,transparent)}
   .hero__video,.hero__poster{object-fit:contain}
   .hero__shade{background:linear-gradient(0deg,rgba(10,10,10,.96) 0,rgba(10,10,10,.75) 38%,rgba(10,10,10,0) 62%),linear-gradient(180deg,rgba(10,10,10,.5),rgba(10,10,10,0) 22%)}
@@ -496,7 +500,8 @@ section{position:relative}
   .hero__bottom{display:block}
   .hero__title{font-size:clamp(2.7rem,12.4vw,5rem)}
   .hero__side{display:grid;grid-template-columns:1fr;gap:20px;margin-top:20px}
-  .hero__rail,.hero__cue,.hero__replay{display:none}
+  .hero__rail,.hero__replay{display:none}
+  .hero__cue{bottom:10px}
   .hero__ctas{gap:22px}
   .ticker{padding:14px 0}
   /* about */
@@ -612,9 +617,10 @@ section{position:relative}
 <main id="top">
 <!-- ===================================================== HERO -->
 <section class="hero" id="hero" data-theme="dark" aria-label="Introduction">
+<div class="hero__pin" id="heroPin">
   <div class="hero__media" id="heroMedia">
     <img class="hero__poster" src="{{img:poster}}" alt="A tan leather cap-toe oxford shoe floating against a black studio background, lit from above." width="1600" height="900">
-    <video class="hero__video" id="heroVideo" muted playsinline preload="metadata" poster="{{img:first}}" aria-hidden="true" disablepictureinpicture>
+    <video class="hero__video" id="heroVideo" muted playsinline preload="auto" poster="{{img:first}}" aria-hidden="true" disablepictureinpicture>
       <source src="videos/footwear-assembly-mobile.mp4" media="(max-width: 700px)" type="video/mp4">
       <source src="videos/footwear-assembly.mp4" type="video/mp4">
     </video>
@@ -643,8 +649,8 @@ section{position:relative}
       </div>
     </div>
   </div>
-  <button class="hero__replay mono" id="replay" aria-label="Replay assembly film" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"><path d="M2 7a5 5 0 1 0 1.6-3.7M2 1.5v3h3"/></svg>Replay</button>
-  <div class="hero__cue mono" aria-hidden="true">Scroll<i></i></div>
+  <div class="hero__cue mono" id="heroCue" aria-hidden="true">Scroll to assemble<i></i></div>
+</div>
 </section>
 
 <div class="ticker" aria-hidden="true">
@@ -982,27 +988,38 @@ burger.addEventListener('click', () => setMenu(!menuOpen));
 addEventListener('keydown', e => { if (e.key === 'Escape') { if (menuOpen) { setMenu(false); burger.focus(); } else if (caseOpen) closeCase(); } });
 addEventListener('resize', () => { if (menuOpen && desk()) closeMenu(); });
 
-/* ---- hero video ---- */
-const hero = $('#hero'), vid = $('#heroVideo'), tc = $('#heroTc'), replay = $('#replay');
+/* ---- hero video: scroll-scrubbed ---- */
+const hero = $('#hero'), vid = $('#heroVideo'), tc = $('#heroTc'), heroCue = $('#heroCue');
 const fmt = s => '00:' + String(Math.min(8, Math.floor(s))).padStart(2, '0');
-let videoOk = false;
+let videoOk = false, heroP = 0, vTarget = 0, vCur = 0;
+const dur = () => (isFinite(vid.duration) && vid.duration > 0 ? vid.duration : 7.9);
 function fallback() { if (!videoOk) hero.classList.add('no-video'); }
-function startVideo() {
-  if (reduce) { fallback(); return; }
-  const p = vid.play();
-  if (p && p.catch) p.catch(fallback);
-  setTimeout(() => { if (vid.readyState < 3 && vid.paused) fallback(); }, 5000);
+function videoReady() {
+  if (videoOk) return;
+  videoOk = true; vid.classList.add('is-on'); hero.classList.remove('no-video');
+  // iOS/Safari only paint seeked frames after the element has been "played" once
+  const k = vid.play(); if (k && k.then) k.then(() => vid.pause()).catch(() => {}); else vid.pause();
 }
-vid.addEventListener('playing', () => { videoOk = true; vid.classList.add('is-on'); hero.classList.remove('no-video'); });
-vid.addEventListener('error', fallback);
-vid.querySelectorAll('source').forEach(s => s.addEventListener('error', fallback));
-vid.addEventListener('timeupdate', () => { tc.textContent = `Assembly ${fmt(vid.currentTime)} / ${fmt(vid.duration || 8)}`; });
-vid.addEventListener('ended', () => { tc.textContent = 'Assembly complete'; replay.classList.add('is-on'); });
-replay.addEventListener('click', () => { replay.classList.remove('is-on'); vid.currentTime = 0; vid.play(); });
-/* pause when offscreen */
-new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) vid.pause(); else if (videoOk && !vid.ended && !reduce) vid.play().catch(() => {}); }), { threshold: 0 }).observe(hero);
+if (reduce) { hero.classList.add('is-static', 'no-video'); }
+else {
+  vid.addEventListener('loadeddata', videoReady);
+  vid.addEventListener('canplay', videoReady);
+  vid.addEventListener('error', fallback);
+  vid.querySelectorAll('source').forEach(s => s.addEventListener('error', fallback));
+  setTimeout(() => { if (vid.readyState < 2) fallback(); }, 7000);
+  vid.load();
+  (function scrubLoop() {
+    if (videoOk && vid.readyState >= 2) {
+      vCur += (vTarget - vCur) * .14;
+      if (Math.abs(vTarget - vCur) < .002) vCur = vTarget;
+      if (Math.abs(vid.currentTime - vCur) > 1 / 60) vid.currentTime = vCur;
+      tc.textContent = `Assembly ${fmt(vCur)} / ${fmt(dur())}`;
+    }
+    requestAnimationFrame(scrubLoop);
+  })();
+}
 
-function ready() { document.body.classList.add('is-ready'); root.classList.add('is-ready'); hero.classList.add('is-ready'); startVideo(); }
+function ready() { document.body.classList.add('is-ready'); root.classList.add('is-ready'); hero.classList.add('is-ready'); }
 const readyOnce = () => { if (readyOnce.d) return; readyOnce.d = 1; ready(); };
 if (document.readyState === 'complete') readyOnce(); else addEventListener('load', readyOnce);
 setTimeout(readyOnce, 2500);
@@ -1116,10 +1133,19 @@ function frame() {
     for (const s of themed) { const top = s.getBoundingClientRect().top + y; if (probe >= top && probe < top + s.offsetHeight) th = s.dataset.theme; }
     nav.classList.toggle('is-light', th === 'light' && !menuOpen);
     secLinks.forEach((s, i) => { if (!s) return; const r = s.getBoundingClientRect(); navLinks[i].classList.toggle('is-active', r.top < vh * .5 && r.bottom > vh * .5); });
-    // hero
-    if (y < vh * 1.2) {
+    // hero (pinned, scroll-scrubbed)
+    if (!hero.classList.contains('no-video')) {
+      const hr = hero.getBoundingClientRect();
+      const p = clamp(-hr.top / Math.max(1, hr.height - vh));
+      heroP = p;
+      vTarget = clamp(p / .86) * (dur() - .04);
+      heroMedia.style.transform = desk() ? `scale(${1 + p * .06})` : `translate3d(-50%,0,0) scale(${1 + p * .05})`;
+      const out = clamp((p - .9) / .1);
+      heroUi.style.transform = `translate3d(0,${-out * 40}px,0)`; heroUi.style.opacity = String(1 - out);
+      heroCue.style.opacity = p > .03 ? 0 : '';
+    } else {
       const p = clamp(y / vh);
-      heroMedia.style.transform = desk() ? `translate3d(0,${p * 6}vh,0) scale(${1 + p * .1})` : `translate3d(-50%,${p * 40}px,0)`;
+      heroMedia.style.transform = desk() ? `translate3d(0,${p * 6}vh,0)` : `translate3d(-50%,${p * 40}px,0)`;
       heroUi.style.transform = `translate3d(0,${-p * 50}px,0)`; heroUi.style.opacity = String(1 - clamp(p * 1.5));
     }
     // sections
