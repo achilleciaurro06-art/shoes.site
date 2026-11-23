@@ -200,7 +200,7 @@ class Scene:
             s.gloss[y0:y1, x0:x1] = np.where(m > .02, gl, s.gloss[y0:y1, x0:x1])
 
     # lighting
-    def render(s, light=(-.55, -.6, .5), lamp=(.33, .22), lamp_r=.85, vig=.62, dof=None, expo=2.0, grain=.03, warm=1.0):
+    def render(s, light=(-.55, -.6, .5), lamp=(.33, .22), lamp_r=.85, vig=.62, dof=None, expo=2.0, grain=.03, warm=1.0, tint=(1.0, .93, .80), lift=1.0):
         H, W = s.H, s.W
         gy, gx = np.gradient(s.h)
         n = np.dstack([-gx, -gy, np.ones_like(s.h)]); n /= np.linalg.norm(n, axis=2, keepdims=True)
@@ -212,7 +212,7 @@ class Scene:
         light_amt = (.18 + .82 * diff) * (1 - np.clip(cav, 0, .75))
         yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
         lampf = np.exp(-(((xx - lamp[0] * W) / (lamp_r * W)) ** 2 + ((yy - lamp[1] * H) / (lamp_r * H)) ** 2))
-        img = s.a * (light_amt * (.38 + .95 * lampf))[..., None] * np.array([1.0, .93, .80]) * warm
+        img = s.a * (light_amt * (.38 + .95 * lampf) * lift)[..., None] * np.array(tint) * warm
         img = img + (spec * (.35 + .9 * lampf))[..., None] * np.array([1, .9, .76])
         if dof is not None:                              # (focus_y, falloff)
             fy, fo = dof
