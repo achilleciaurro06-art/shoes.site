@@ -136,7 +136,7 @@ section{position:relative}
 .hero__pin{position:sticky;top:0;height:100vh;height:100svh;min-height:640px;overflow:hidden;isolation:isolate;background:var(--black)}
 .hero.no-video,.hero.is-static{height:100vh;height:100svh;min-height:640px}
 .hero.no-video .hero__pin,.hero.is-static .hero__pin{position:relative}
-.hero__media{position:absolute;left:0;right:0;top:0;bottom:12vh;-webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent);transform-origin:60% 40%;will-change:transform}
+.hero__media{position:absolute;left:0;right:0;top:0;bottom:0;transform-origin:50% 50%;will-change:transform}
 .hero__poster,.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
 .hero__poster{opacity:0;transition:opacity 1s ease}
 .hero__video{opacity:0;transition:opacity 1.4s ease;background:#000}
@@ -470,7 +470,6 @@ section{position:relative}
   .stage{display:block}
 }
 @media (max-width:1200px){.hero__rail{display:none}}
-@media (min-width:900px) and (max-aspect-ratio:3/2){.hero__media{bottom:24vh}}
 @media (max-width:1100px){
   .nav__links{gap:22px}
   .hero__title{grid-column:1/13}
@@ -488,7 +487,7 @@ section{position:relative}
   .menu.is-open .menu__aside{opacity:1;transform:none}
   .hero{height:320vh}
   .hero__pin{min-height:600px}
-  .hero__media{top:calc(var(--nav-h) + 9svh);bottom:auto;height:min(60vh,74vw);left:50%;right:auto;width:132vw;transform:translateX(-50%);-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 78%,transparent)}
+  .hero__media{top:calc(44% - 42.2vw);bottom:auto;height:84.4vw;left:50%;right:auto;width:150vw;transform:translateX(-50%);-webkit-mask-image:linear-gradient(transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(transparent,#000 12%,#000 88%,transparent)}
   .hero__video,.hero__poster{object-fit:contain}
   .hero__shade{background:linear-gradient(0deg,rgba(10,10,10,.96) 0,rgba(10,10,10,.75) 38%,rgba(10,10,10,0) 62%),linear-gradient(180deg,rgba(10,10,10,.5),rgba(10,10,10,0) 22%)}
   .hero__ui{display:flex;flex-direction:column;justify-content:space-between;padding-bottom:24px}
@@ -621,11 +620,11 @@ section{position:relative}
   <div class="hero__media" id="heroMedia">
     <img class="hero__poster" src="{{img:poster}}" alt="Brogue cap and medallion perforations on tan calf leather, lit by a raking lamp." width="1600" height="900">
     <video class="hero__video" id="heroVideo" muted playsinline preload="auto" poster="{{img:first}}" aria-hidden="true" disablepictureinpicture>
-      <source src="videos/footwear-assembly-mobile.mp4" media="(max-width: 700px)" type="video/mp4">
-      <source src="videos/footwear-assembly.mp4" type="video/mp4">
+      <source src="videos/running-sole-scroll-mobile.mp4" media="(max-width: 700px)" type="video/mp4">
+      <source src="videos/running-sole-scroll.mp4" type="video/mp4">
     </video>
   </div>
-  <div class="hero__shade"></div>
+  <div class="hero__shade" id="heroShade"></div>
   <div class="hero__curtain"></div>
 
   <div class="hero__rail mono" aria-hidden="true">Lorenzo Ferrante — Footwear Business &amp; Product Development</div>
@@ -989,7 +988,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') { if (menuOpen) { set
 addEventListener('resize', () => { if (menuOpen && desk()) closeMenu(); });
 
 /* ---- hero video: scroll-scrubbed ---- */
-const hero = $('#hero'), vid = $('#heroVideo'), tc = $('#heroTc'), heroCue = $('#heroCue');
+const hero = $('#hero'), vid = $('#heroVideo'), tc = $('#heroTc'), heroCue = $('#heroCue'), heroShade = $('#heroShade');
 const fmt = s => '00:' + String(Math.min(8, Math.floor(s))).padStart(2, '0');
 let videoOk = false, heroP = 0, vTarget = 0, vCur = 0;
 const dur = () => (isFinite(vid.duration) && vid.duration > 0 ? vid.duration : 7.9);
@@ -1006,7 +1005,7 @@ else {
   vid.addEventListener('canplay', videoReady);
   vid.addEventListener('error', fallback);
   vid.querySelectorAll('source').forEach(s => s.addEventListener('error', fallback));
-  setTimeout(() => { if (vid.readyState < 2) fallback(); }, 7000);
+  setTimeout(() => { if (vid.readyState < 2) fallback(); }, 20000);
   vid.load();
   (function scrubLoop() {
     if (videoOk && vid.readyState >= 2) {
@@ -1140,8 +1139,10 @@ function frame() {
       heroP = p;
       vTarget = clamp(p / .86) * (dur() - .04);
       heroMedia.style.transform = desk() ? `scale(${1 + p * .06})` : `translate3d(-50%,0,0) scale(${1 + p * .05})`;
-      const out = clamp((p - .9) / .1);
+      // the film needs the whole frame: text steps aside as soon as the scroll starts driving it
+      const out = (t => t * t * (3 - 2 * t))(clamp((p - .04) / .10));
       heroUi.style.transform = `translate3d(0,${-out * 40}px,0)`; heroUi.style.opacity = String(1 - out);
+      heroShade.style.opacity = String(1 - .85 * out);
       heroCue.style.opacity = p > .03 ? 0 : '';
     } else {
       const p = clamp(y / vh);
